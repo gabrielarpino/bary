@@ -1,0 +1,8 @@
+\boolfalse {citerequest}\boolfalse {citetracker}\boolfalse {pagetracker}\boolfalse {backtracker}\relax 
+\defcounter {refsection}{0}\relax 
+\select@language {english}
+\contentsline {section}{\numberline {1}Problem Description}{1}{section.1}
+\contentsline {section}{\numberline {2}Theoretical Observations}{3}{section.2}
+\contentsline {subsection}{\numberline {2.1}Equivalent Covariance Matrices}{3}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}Covariance Matrices differing by a constant}{6}{subsection.2.2}
+\contentsline {subsection}{\numberline {2.3}Entropy}{8}{subsection.2.3}

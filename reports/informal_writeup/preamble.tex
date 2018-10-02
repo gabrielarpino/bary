@@ -1,0 +1,313 @@
+% General packages
+\usepackage[T1]{fontenc}     % Encoding
+\usepackage[english]{babel}  % Naming of figures and such
+\usepackage[
+    style      = alphabetic-verb,
+    sortlocale = en_GB,
+    backend    = biber,
+    backref    = true
+    ]{biblatex}              % Bibliography styling
+\usepackage{csquotes}        % Required for biblatex
+\usepackage{import}          % Importing subdocuments
+\usepackage{standalone}      % Compilable subdocuments
+\usepackage{hyperref}        % Clickable references
+
+% Page layout
+\usepackage[
+    a4paper,
+    bottom     = 1.4in,
+    top        = 1.4in,
+    left       = 1.1in,
+    right      = 1.1in,
+    headheight = 15pt
+    ]{geometry}                % Margins
+\usepackage{fancyhdr}          % Header
+\usepackage{lastpage}          % Page numbers in footer
+\usepackage{setspace}          % Line spacing
+\usepackage{ragged2e}          % Better line endings
+\usepackage[parfill]{parskip}  % New line instead of indentation
+\usepackage{titlesec}          % Size of sections
+\usepackage{titlecaps}         % Automatic capitalisation of titles
+\usepackage[
+    hang,
+    bottom
+    ]{footmisc}                % Configure footnotes
+
+% Utility
+\usepackage[table]{xcolor}      % Colors
+\usepackage[
+    separate-uncertainty=true,
+    per-mode=symbol
+    ]{siunitx}                  % Display units
+\usepackage{enumitem}           % Better enumeration
+\usepackage{ifthen}             % If statements
+\usepackage{lipsum}             % Lorem ipsum
+\usepackage{listings}           % Listings
+\usepackage{xparse}             % Better arguments for \newcommand
+
+% Figures
+\usepackage{pgfplots}        % Plots
+\pgfplotsset{compat=newest}
+\usepackage{tikz}            % Tikz figures
+\usepackage{float}           % Floating of figures
+\usepackage{multirow}        % Cells spanning multiple rows
+\usepackage{graphicx}        % Graphics
+\usepackage{caption}         % Subfigures and captions
+\usepackage{subcaption}      % Subfigures and captions
+\usepackage{booktabs}        % Toprule et cetera
+
+% Math
+\usepackage{amsmath}  % Math commands
+\usepackage{amsthm}   % Math environments
+\usepackage{amssymb}  % Math symbols
+\usepackage{cancel}   % Cancel equations
+
+% Final packages
+\usepackage[
+    noabbrev,
+    capitalize,
+    nameinlink]{cleveref}       % Automatic referencing
+
+% Footnote styling
+\renewcommand{\footnotelayout}{\setstretch{1.0}}
+\setlength{\footnotemargin}{1em}
+
+% Float placement
+\floatplacement{figure}{t}
+\floatplacement{table}{t}
+
+% Environments
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{definition}{Definition}
+\newtheorem{model}{Model}
+\newtheorem{proposition}{Proposition}
+\newtheorem{todo}{TODO}
+
+% Cleverref environments
+\crefname{theorem}{Theorem}{Theorems}
+\Crefname{theorem}{Theorem}{Theorems}
+\crefname{lemma}{Lemma}{Lemmas}
+\Crefname{lemma}{Lemma}{Lemmas}
+\crefname{corollary}{Corollary}{Corollaries}
+\Crefname{corollary}{Corollary}{Corollaries}
+\crefname{definition}{Definition}{Definitions}
+\Crefname{definition}{Definition}{Definitions}
+\crefname{model}{Model}{Models}
+\Crefname{model}{Model}{Models}
+
+% Referentiable list items in environments
+\newlist{deflist}{enumerate}{1}
+\setlist[deflist]{ref=\thedefinition.(\arabic*), label=(\arabic*)}
+\crefname{deflisti}{Definition}{Definitions}
+\Crefname{deflisti}{Definition}{Definitions}
+\newlist{thmlist}{enumerate}{1}
+\setlist[thmlist]{ref=\thetheorem.(\arabic*), label=(\arabic*)}
+\crefname{thmlisti}{Theorem}{Theorems}
+\Crefname{thmlisti}{Theorem}{Theorems}
+
+% Fix interference of parfill option of parskip package with amsmath environments.
+\begingroup
+    \makeatletter
+    \@for\theoremstyle:=theorem,corollary,lemma,model,definition,remark,plain\do{%
+        \expandafter\g@addto@macro\csname th@\theoremstyle\endcsname{%
+            \setlength\thm@preskip\parskip
+            \setlength\thm@postskip\parskip%{0pt}
+            \addtolength\thm@preskip\parskip
+            }%
+        }
+\endgroup
+
+% Hyperlink setup
+\definecolor{darkblue}{rgb}{0.0, 0.0, 0.75}
+\hypersetup{
+    colorlinks,
+    citecolor = darkblue,
+    filecolor = darkblue,
+    linkcolor = darkblue,
+    urlcolor  = darkblue
+}
+\newcommand{\blackLinks}{
+    \hypersetup{
+        citecolor = black,
+        filecolor = black,
+        linkcolor = black,
+        urlcolor  = black
+    }
+}
+
+% Left-justified text in tabularx environment
+\newcolumntype{L}{>{\RaggedRight\arraybackslash}X}
+
+% Typewriter font
+\renewcommand*{\ttdefault}{pcr}     % Courier
+\newcommand{\code}[1]{\texttt{#1}}
+
+% Style enumerate
+\setlist[enumerate]{label=(\arabic*)}
+\setlist[itemize]{label=\textbullet}
+
+% Shortcuts to colors
+\newcommand{\red}[1]{{\color{red} #1}}
+\newcommand{\blue}[1]{{\color{blue} #1}}
+\newcommand{\green}[1]{{\color{green} #1}}
+
+% Line spacing
+\onehalfspacing
+
+% Page layout
+\pagestyle{fancy}
+\lhead{\DocTitle}
+\chead{}
+\rhead{\DocAuthors}
+\lfoot{}
+\cfoot{}
+\rfoot{Page~\thepage~of~\pageref*{LastPage}}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\newcommand{\DocTitle}{}
+\newcommand{\DocAuthors}{}
+\newcommand{\noHeader}{
+    \fancyhead{}
+    \newgeometry{top=1.1in, bottom=1.4in, left=1.1in, right=1.1in}
+}
+
+% Title
+\renewcommand{\title}{
+    \ifthenelse{\isundefined{\titleDisplayed}}{
+        \vspace*{1\baselineskip}
+        {\LARGE\bfseries\DocTitle}
+        \vspace*{0.5\baselineskip}
+        \newcommand{\titleDisplayed}{}  % Do not display a second title
+        \suppressfloats                 % Surpress floats on title page
+    }{}
+}
+
+% Listing setup
+\newcommand\listingStyle{\lstset{
+    otherkeywords    = {self},
+    basicstyle       = \small\linespread{0.8}\selectfont\ttfamily,
+    showstringspaces = false,
+    breaklines       = true,
+    postbreak        = \raisebox{0ex}[0ex][0ex]{\ensuremath{\color{red}\hookrightarrow\space}},
+    tabsize          = 2,
+    escapeinside     = {(*}{*)},
+    mathescape
+}}
+\lstnewenvironment{listing}[1][]
+    {\vspace{0.25em}\listingStyle\lstset{#1}}
+    {\vspace{-0.75em}}
+
+% Tikz setup
+\usetikzlibrary{
+    arrows.meta,
+    calc
+}
+% Graphical models
+\tikzset{
+    every picture/.append style = {
+        xscale = 2,
+        yscale = 2
+    },
+    line/.style = {
+        thick,
+        ->,
+        > = {
+            Triangle[length=2.0mm, width=2.0mm]
+        }
+    },
+    % Invisible node
+    hidden node/.style = {
+        circle,
+        minimum size = 1cm,
+        draw = white,
+        thick
+    },
+    % Latent variable
+    latent node/.style = {
+        hidden node,
+        draw = black,
+    },
+    % Observed variable
+    observed node/.style = {
+        latent node,
+        fill = gray!15
+    },
+    % Plate
+    plate/.style = {
+        draw,
+        label={[anchor=south west, xshift=5pt, yshift=5pt]south west:#1},
+        shape=rectangle,
+        inner sep=10pt,
+        thick
+    }
+
+}
+% Relative spacing in Tikz figures
+\newcommand{\rel}[2]{($(#1) + (#2)$)}
+
+% Vectors
+\renewcommand{\vec}[1]{\boldsymbol{#1}} % Vector
+\newcommand{\vecu}[1]{\hat{\vec{#1}}}   % Unit vector
+\newcommand{\mat}[1]{\vec{#1}}          % Matrix
+
+% Commonly used sets
+\newcommand{\Z}{\mathbb{Z}}   % Integers
+\newcommand{\R}{\mathbb{R}}   % Real numbers
+\newcommand{\Q}{\mathbb{Q}}   % Rational numbers
+\newcommand{\C}{\mathbb{C}}   % Complex numbers
+\newcommand{\N}{\mathbb{N}}   % Natural numbers
+
+% Symbols
+\newcommand{\es}{\varnothing}  % Empty set
+\newcommand{\e}{\varepsilon}   % Epsilon
+\newcommand{\sub}{\subseteq}   % Subset
+\renewcommand{\d}{\partial}    % Partial
+\renewcommand{\th}{\theta}     % Theta
+\renewcommand{\O}{\mathcal{O}} % Landau's symbol
+
+% Operators
+\renewcommand{\Re}{\operatorname{Re}}
+\renewcommand{\Im}{\operatorname{Im}}
+\renewcommand{\max}{\operatorname{max}}
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\argmax}{argmax}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\sign}{\operatorname{sign}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\card}{\#}
+\newcommand{\comp}{\circ}
+\newcommand{\had}{\circ}
+\newcommand{\chol}{\operatorname{chol}}
+\newcommand{\ind}{\operatorname{ind}}
+\newcommand{\KL}{\operatorname{D}_{\text{KL}}}
+
+% Special math commands
+\newcommand{\set}[1]{\{\,#1\,\}}          % Set with proper spacing
+\renewcommand{\ss}[1]{_\mathit{#1}}       % Subscripts without spacing
+\newcommand{\sd}[1]{\, \mathrm{d} #1}     % Straight 'd' in integral
+\newcommand{\sce}{\text{\sc{e}}}          % Scientific notation
+\newcommand{\cond}{\, | \,}               % Conditioning
+\newcommand{\middleCond}{\, \middle| \,}  % Conditioning
+\newcommand{\divsep}{\,\|\,}              % Seperator in divergences
+\newcommand{\T}{\text{\textsf{T}}}        % Transposed
+\newcommand{\idf}{\text{\textsf{id}}}     % Identity function
+
+% Other commands
+\newcommand{\bs}{\textbackslash}
+\newcommand{\vardot}{\,\cdot\,}
+\newcommand{\creftitle}[2]{\texorpdfstring{\cref{#2}}{#1 \ref{#2}}}
+
+% Compatibility
+\newcommand{\id}[1]{\sd{#1}}
+\newcommand{\sargmax}[1]{\argmin_{#1}}
+\newcommand{\sargmin}[1]{\argmax_{#1}}
+
+% Angle brackets
+\newcommand{\la}{\langle}
+\newcommand{\ra}{\rangle}
+\newcommand{\lla}{\left\langle}
+\newcommand{\rra}{\right\rangle}

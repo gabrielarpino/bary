@@ -1,0 +1,350 @@
+\documentclass[12pt]{article}
+\input{preamble.tex}
+\addbibresource{bibliography.bib}
+
+\renewcommand{\DocTitle}{Barycenters vs. Model Averages in Gaussian Models}
+\renewcommand{\DocAuthors}{Gabriel Arpino}
+
+\setcounter{tocdepth}{4} % Show subsections in the TOC
+\setcounter{secnumdepth}{4}
+
+\begin{document}
+\title
+\tableofcontents
+\section{Problem Description}
+
+It is of importance in machine learning to be able to combine models, be it as a
+means of reducing uncertainty in predictions or hedging risk during prediction time.
+The machine learning community has been exploring this topic in various forms,
+from ensembling techniques (\cite{NIPS2017_7219}) to stochastic optimal transport
+(\cite{DBLP:journals/corr/abs-1802-05757}). A recent paper, \cite{NIPS2017_7149},
+explores the idea of averaging Gaussian Process models using Wasserstein Barycenters,
+and show that it produces clearer and more representative results than the "naive average",
+which is equivalent to calculating the average and standard deviation of the mean of
+these gaussian processes. They propose a tractable fixed point iteration method for
+calculating the barycenter distribution, and display experimental results. A question
+to ask is whether this is required for Gaussian Processes at all, because averaging
+finite dimensional representations of these is equivalent to adding up Gaussian measures.
+Identifying similarities and differences between these two approaches can help
+the community understand when the $O(n^3)$ complexity of calculating the barycenter
+is a requirement, or when a simple sum of gaussian moments could be used.
+
+The probability of a predicted function $f$ from a model within a set of models
+$M$ of size $N$ is as follows:
+
+\begin{equation} \label{eq:1}
+    p(f) = \int p(f | M)p(M) dM
+\end{equation}
+
+which follows from marginalization. This method of reasoning about the "average"
+of model predictions will be termed \textit{Model Averaging}. For the case of
+gaussian process models, the integral in \ref{eq:1} is tractable, as the sum becomes
+discrete and gaussians are closed under addition:
+
+\begin{equation} \label{eq:2}
+    p(f) = \sum_{i=1}^N \xi_i p(f | M_i)
+\end{equation}
+
+where $\xi$ are the discrete probabilities of each model (assuming $p(M)$ is a
+discrete measure). For gaussian finite dimensional distributions (the stochastic processes
+evaluated at discrete input points) $X_i$, $p(f)$ has the following moments:
+
+\begin{align*}
+    \mathbb{E}[X^*] &= \sum_{i=1}^N \xi_i \mathbb{E}[X_i], &
+    \mathbb{E}[X^*X^{*T}] &= \sum_{i=1}^N \xi_i \mathbb{E}[X_iX_i^T],
+\end{align*}
+
+Where $X^*$ is the random variable denoting $p(f)$ in \ref{eq:2}. It is not always
+the case, however, that \ref{eq:1} is analytically tractable, and in such cases
+the integral and moments of the distribution can be approximated using Monte Carlo.
+
+The barycenter $\mu^*$ of $N$ gaussian distributions $\mu _i$ is defined as follows:
+
+\begin{align*} \label{barycenter:1}
+    \mu^* = \inf_{\mu \in P_2(H)} \sum_{i=1}^{N} \xi_i W_2^2(\mu_i, \mu)
+\end{align*}
+
+where $W_2^2(\mu_1, \mu_2)$ denotes the 2-Wasserstein metric between gaussian
+measures $\mu_1$, $\mu_2$ \cite{NIPS2017_7149}.
+
+It is unclear whether, for their use in GPs, barycenters provide a reduced uncertainty
+ensemble of models compared to standard model averaging. The text explores this idea,
+and states certain scenarios where these two methods of averaging are equal, and where
+they diverge.
+
+\section{Theoretical Observations}
+
+\subsection{Equivalent Covariance Matrices}
+
+For the finite dimensional distribution representation of Gaussian Processes, it
+can be shown that the barycenter distribution is a Gaussian distribution with
+mean $\bar{m}$ and covariance matrix $\bar{K}$ denoted as follows \cite{NIPS2017_7149}:
+
+\begin{align*}
+    \bar{m} &= \sum_{i=1}^{N} \xi_i m_i, &
+    \bar{K} &= \sum_{i=1}^{N} \xi_i (\bar{K}^{\frac{1}{2}} K_i \bar{K}^{\frac{1}{2}}),
+\end{align*}
+
+Assume there is some data $\textbf{y}$ and some time points we would like to predict
+$t_*$ with function values $y_*$. This can be modelled with a GP:
+
+\begin{align}
+  \begin{bmatrix}
+    \textbf{y} \\
+    y_*
+\end{bmatrix} \sim \mathcal{N} \bigg( 0,\begin{bmatrix}
+      K & K_*^T \\
+      K_* & K_{**}
+  \end{bmatrix} \bigg)
+\end{align}
+
+Conditioning this GP on a training set $\textbf{y}$ and evaluating on the finite set $T^*$ produces
+a finite dimensional gaussian distribution with moments \cite{1505.02965}:
+
+\begin{align*}
+    \mathbb{E}[\bar{y}_*] &= K_* K^{-1} \textbf{y}, &
+    \hat{K} &= var(\bar{y}_*) = K_{**} - K_{*} K^{-1} K_*^T
+\end{align*}
+
+Let us consider the case where we are averaging GPs with equivalent
+kernel functions $k(t, t^\prime)$ and means $\mu_i$. Assume that our prior
+distribution over these models is uniform, so $\xi_i = 1/N$. The model average $p(f)$ can
+be calculated from \ref{eq:2} and the fact that gaussians are closed under addition:
+
+\begin{equation} \label{eq:3}
+    p(f) \sim \mathcal{N}(\frac{1}{2} \mu_1 + \frac{1}{2} \mu_2, \frac{1}{2} K_1 + \frac{1}{2} K_2)
+\end{equation}
+
+Where $K_i$ denotes the covariance matrix that is the gram matrix produced from a GP's
+respective kernel function $k(t, t^\prime)$. According to our assumption that both GPs
+contain equivalent kernel functions, their covariance matrices $K_i$ are equivalent,
+so \ref{eq:3} reduces to:
+
+\begin{equation} \label{eq:4}
+    p(f) \sim \mathcal{N}(\frac{1}{2} \mu_1 + \frac{1}{2} \mu_2, K)
+\end{equation}
+
+where $K = K_1 = K_2$. Now, since we currently care about averaging the predictions
+of GPs that have been conditioned on data (they are not as informative otherwise),
+we can note that the posterior kernels of these two GPs are also equivalent, which
+follows from the equivalence of their kernel functions and the equivalent formulations
+for $\hat{K}$, the posterior covariance matrix. Let us denote this common posterior covariance matrix
+$\hat{K}$, and consider the following proposition:
+
+\begin{proposition} \label{prop:1}
+    The barycenter of gaussian processes with equivalent kernel functions $k(t, t^{\prime})$
+    is equivalent to their model average.
+\end{proposition}
+
+\begin{proof}
+    In order to show this is true, we have to show that both the moments of both
+    distributions (the barycenter and the model average) are equivalent, since gaussian
+    measures are entirely defined by their first two moments. We start with the
+    means which follow trivially from \ref{eq:2} and \ref{barycenter:1}:
+
+    \begin{equation}
+        \mathbb{E}[p(f)] = \sum \xi_i \mathbb{E}[p(f | M)] = \sum \xi_i \mu_i = \bar{m}
+    \end{equation}
+
+    We now work to show that $\bar{K} = \hat{K}$. This can be shown by proving that
+    $\hat{K}$ is a solution to the fixed point iteration equation \ref{eq:2}. This
+    equation is shown to be convex in \cite{NIPS2017_7149}, so finding a solution
+    ensures that it is optimal:
+
+    \begin{equation} \label{OTkern}
+        \bar{K} = \sum_{i=1}^{N} \xi_i (\bar{K}^{\frac{1}{2}} K_i \bar{K}^{\frac{1}{2}})
+    \end{equation}
+
+    Substitute $\hat{K}$ into the right hand side:
+
+    \begin{equation}
+        \sum_{i=1}^{N} \xi_i (\hat{K}^{\frac{1}{2}} K_i \hat{K}^{\frac{1}{2}})
+    \end{equation}
+
+    but keeping in mind that, since all gaussian processes possess the same kernel
+    function, $\hat{K} = K_i$, so:
+
+    \begin{equation} \label{lolwow}
+        = \sum_{i=1}^{N} \xi_i (\hat{K}^{\frac{1}{2}} \hat{K} \hat{K}^{\frac{1}{2}})^(\frac{1}{2})
+    \end{equation}
+
+    We have to show that \ref{lolwow} equals $\hat{K}$ for the implicit equation
+    to be satisfied. Keeping in mind that covariance matrices are symmetric, hence
+    positive semidefinite, diagonalizable, and possess orthogonal eigenvectors, we apply
+    the diagonal decomposition to each matrix:
+
+    \begin{equation}
+        \hat{K} = U \Lambda U^T
+    \end{equation}
+
+    which leads to
+
+    \begin{equation}
+        &= \sum_{i=1}^{N} \xi_i ((U \Lambda U^T)^{\frac{1}{2}} (U \Lambda U^T) (U \Lambda U^T)^{\frac{1}{2}}).
+    \end{equation}
+
+    Recall that, for orthogonal matrices $U$, $U U^T = I$ and
+
+    \begin{equation}
+        (U \Lambda ^{\frac{1}{2}} U^T) (U \Lambda ^{\frac{1}{2}} U^T) = U \Lambda U^T
+    \end{equation}
+
+    so, $(U \Lambda ^{\frac{1}{2}} U^T) = (U \Lambda U^T)^{\frac{1}{2}}$. Plugging this into \ref{lolwow}:
+
+    \begin{align*} \label{k_deriv}
+        &= \sum_{i=1}^{N} \xi_i ((U \Lambda^{\frac{1}{2}} U^T) (U \Lambda U^T) (U \Lambda^{\frac{1}{2}} U^T))^{\frac{1}{2}} \\
+        &= \sum_{i=1}^{N} \xi_i (U \Lambda^{\frac{1}{2}} \Lambda \Lambda^{\frac{1}{2}} U^T)^{\frac{1}{2}} \\
+        &= \sum_{i=1}^{N} \xi_i (U \Lambda^2 U^T)^{\frac{1}{2}} \\
+        &= U \Lambda U^T \\
+        &= \hat{K}
+    \end{align*}
+
+    Therefore, $\hat{K}$ is the unique solution to the fixed point iteration equation and we
+    have shown that the gaussian distributions created by model averaging and calculating
+    the barycenter of gaussian processes with prior probabilities $x_i$ are equivalent
+    given that they possess the same kernel function $k(t, t^\prime)$.
+\end{proof}
+
+This result entails that conclusions achieved in \cite{NIPS2017_7149} could have
+been achieved through simple model averaging, as the paper used the same kernels
+for fitting the gaussian processes, but different samples of data.
+
+\subsection{Covariance Matrices differing by a constant}
+
+For the case of covariance matrices differing by a constant, we analyze the following finite dimensional GPs:
+
+\begin{align}
+    \textbf{y} \sim \mathcal{N} \big(0, \Sigma \big), &
+    \textbf{y} \sim \mathcal{N} \big(0, \alpha \Sigma \big)
+\end{align}
+
+where $\alpha$ is a positive constant. Analyzing these two gaussians for now, we can attempt to derive what a solution to the
+fixed point iteration barycenter equation could be, suppose it is of the form $\beta \Sigma$, $\beta$ a positive constant. Then
+from \ref{OTkern} and assuming a uniform average of distributions ($\xi = 1/N$) we expand:
+
+\begin{align}
+    \beta \Sigma = \frac{1}{2} ((\beta \Sigma)^{\frac{1}{2}}  \Sigma (\beta \Sigma)^{\frac{1}{2}})^{\frac{1}{2}} +
+    \frac{1}{2} ((\beta \Sigma)^{\frac{1}{2}} \alpha \Sigma (\beta \Sigma)^{\frac{1}{2}})^{\frac{1}{2}}
+\end{align}
+
+And, taking into account that $\Sigma$ is a positive definite matrix, we use orthogonality to simplify:
+
+\begin{align}
+    \beta \Sigma &= \frac{1}{2} ((\beta \Sigma)^{\frac{1}{2}}  \Sigma (\beta \Sigma)^{\frac{1}{2}})^{\frac{1}{2}} +
+    \frac{1}{2} ((\beta \Sigma)^{\frac{1}{2}} \alpha \Sigma (\beta \Sigma)^{\frac{1}{2}})^{\frac{1}{2}} \\
+    \beta \Sigma &= \frac{1}{2} \beta^{\frac{1}{2}}((\Sigma)^{\frac{1}{2}}  \Sigma (\Sigma)^{\frac{1}{2}})^{\frac{1}{2}} +
+    \frac{1}{2} \beta^{\frac{1}{2}} \alpha^{\frac{1}{2}} ((\Sigma)^{\frac{1}{2}} \Sigma (\Sigma)^{\frac{1}{2}})^{\frac{1}{2}} \\
+    \beta \Sigma &= ((\Sigma)^{\frac{1}{2}}  \Sigma (\Sigma)^{\frac{1}{2}})^{\frac{1}{2}} * (\frac{1}{2} \beta^{\frac{1}{2}} +
+    \frac{1}{2} \beta^{\frac{1}{2}} \alpha^{\frac{1}{2}}) \\
+    \frac{\beta}{(\frac{1}{2} \beta^{\frac{1}{2}} + \frac{1}{2} \beta^{\frac{1}{2}} \alpha^{\frac{1}{2}})} \Sigma &=
+    ((\Sigma)^{\frac{1}{2}}  \Sigma (\Sigma)^{\frac{1}{2}})^{\frac{1}{2}} \\
+    \frac{\beta}{(\frac{1}{2} \beta^{\frac{1}{2}} + \frac{1}{2} \beta^{\frac{1}{2}} \alpha^{\frac{1}{2}})} &= 1 \\
+    \beta^{\frac{1}{2}} (\beta^{\frac{1}{2}} - (\frac{1}{2} + \frac{1}{2} \alpha^{\frac{1}{2}})) &= 0 \\
+\end{align}
+
+simplifying taking into account the relation shown earlier, $K = (K^{\frac{1}{2}} K K^{\frac{1}{2}})^{frac{1}{2}}$ for positive definite
+matrices. Ignoring the trivial solution $\beta^{frac{1}{2}} = 0$, we get that:
+
+\begin{equation} \label{OT_scalar}
+    \beta^{\frac{1}{2}} &=  (\frac{1}{2} + \frac{1}{2} \alpha^{\frac{1}{2}})
+\end{equation}
+
+And if we do the same procedure with the euclidean average, calculating $\beta_{EU}$ for $\Sigma_{EU}$ (also called the euclidean barycenter):
+
+\begin{align}
+    \beta_{EU} \Sigma_{EU} = \frac{1}{2} \Sigma_{EU}  +\frac{1}{2}  \alpha \Sigma_{EU}
+\end{align}
+\begin{equation} \label{EU_scalar}
+    \beta_{EU} &= \frac{1}{2} + \frac{1}{2} \alpha
+\end{equation}
+
+Now, if we analyze equations \label{OT_scalar}, and \label{EU_scalar}, we see that the first grows sublinearly with $\alpha$,
+while the second grows linearly with $\alpha$. This makes sense, and it shows that, for gaussians whose covariance matrices differ
+by a constant, the barycenter always has lower variance. The two $\beta$'s are equal when $\alpha = 1$, which is the first case we
+analyzed, in all other cases,  $(\frac{1}{2} + \frac{1}{2} \alpha^{\frac{1}{2}}) < \frac{1}{2} + \frac{1}{2} \alpha$.
+
+
+
+\subsection{Entropy}
+
+Now, we can formulate the same problem using the notion of entropy, and finding which type of barycenter (euclidean or wassserstein)
+will yield averages with less entropy (more certainty). The entropy of a gaussian distribution of dimension $k$ is:
+
+\begin{equation} \label{ENTROPY}
+    H = \frac{k}{2} + \frac{k}{2} log(2\pi) + \frac{1}{2} log{|\Sigma|}
+\end{equation}
+
+Now we can analyze the entropy of the euclidean and wasserstein barycenters, denoted $H_{EU}$ and $H_{OT}$ respectively. Consider the simple
+case of computing the barycenter of two normal distributions of dimension $k$ with $\xi_i = \frac{1}{2}$:
+
+\begin{align}
+    H_{EU} &= \frac{k}{2} + \frac{k}{2} log(2\pi) + \frac{1}{2} log{|K_{EU}|} \\
+    H_{OT} &= \frac{k}{2} + \frac{k}{2} log(2\pi) + \frac{1}{2} log{|K_{OT}|} \\
+\end{align}
+
+The only terms that differ at the covariance matrix determinants, so let's analyze those.
+
+% \begin{align}
+\begin{eqnarray*}
+    |K_{OT}| = |\frac{1}{2} (K_{OT}^{\frac{1}{2}}K_1K_{OT}^{\frac{1}{2}})^{\frac{1}{2}} +
+                    \frac{1}{2} (K_{OT}^{\frac{1}{2}}K_1K_{OT}^{\frac{1}{2}})^{\frac{1}{2}}| \\
+    |K_{OT}| \geq |\frac{1}{2} (K_{OT}^{\frac{1}{2}}K_1K_{OT}^{\frac{1}{2}})^{\frac{1}{2}}|
+                    + |\frac{1}{2} (K_{OT}^{\frac{1}{2}}K_1K_{OT}^{\frac{1}{2}})^{\frac{1}{2}}| \\
+    |K_{OT}| \geq \frac{1}{2}^{k} |K_{OT}|^{\frac{1}{2}}|K_1|^{\frac{1}{2}}
+                        + \frac{1}{2}^{k} |K_{OT}|^{\frac{1}{2}}|K_2|^{\frac{1}{2}} \\
+    (|K_{OT}|^{\frac{1}{2}})(|K_{OT}|^{\frac{1}{2}} - (\frac{1}{2}^{k} |K_1|^{\frac{1}{2}} + \frac{1}{2}^{k} |K_2|^{\frac{1}{2}})) \geq 0 \\
+    (|K_{OT}|^{\frac{1}{2}} - (\frac{1}{2}^{k} |K_1|^{\frac{1}{2}} + \frac{1}{2}^{k} |K_2|^{\frac{1}{2}})) \geq 0 \\
+\end{eqnarray*}
+% \end{align}
+
+Using the fact that $K_{OT}$ is positive definite and $|A + B| \geq |A| + |B|$ for matrices $A$ and $B$. Now if we analyze
+the euclidean barycenter covariance matrix:
+
+\begin{eqnarray*}
+    |K_{EU}| = |\frac{1}{2} K_1 + \frac{1}{2} K_2| \\
+    |K_{EU}| \geq \frac{1}{2}^{k} |K_1| + \frac{1}{2}^{k} |K_2| \\
+\end{eqnarray*}
+
+It can also be shown through KKT optimization that both matrix determinants can be upper
+bounded by $|K_j|$ where $K$
+
+
+
+
+\begin{todo}
+
+    \begin{itemize}
+        \item Loosen the restriction a little bit, and can start looking at covariance matrices that are simultaneously diagonalizable
+        (same eigenvectors, but different eigenvalues)
+
+        \item Start looking at the entropy of $K$, and how that changes. This has been started, and calculating the entropy actually
+        gives you a lower bound on the $K$ derived from both methods. This is yet to be typed into Latex.
+
+        \item Properly calculate the computational complexity of barycentering vs
+                calculating the model average
+
+        \item Comparing with the case where kernels produce covariance functions with the same eigenvectors,
+                but potentially different eigenvalues and what that means
+
+        \item Is there any case where the variance of the barycenter is larger?
+
+        \item Any proofs for non-gaussian models?
+    \end{itemize}
+
+\end{todo}
+
+
+%
+% \begin{align*}
+%     \MEC_i \cond \hat{\MEC}_i &= f^{-1} \circ \hat{\MEC}_i, &
+%     \hat{\MEC}_i &\sim p(\hat{\MEC} \cond \mathcal{D}),
+% \end{align*}
+
+
+\appendix
+
+
+\printbibliography
+
+
+\end{document}
