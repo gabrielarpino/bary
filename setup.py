@@ -11,7 +11,6 @@ setup(name='bary',
       install_requires=[
 	  'tensorflow',
 	  'numpy',
-        'wbml',
         'gpflow',
         'matplotlib',
       ],
