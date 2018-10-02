@@ -20,3 +20,12 @@ def barycenter(means, kerns, N = 100, T=10000, xi=None):
         Kbar = np.sum([update(kern, Kbar2, xi) for kern in kerns], axis = 0)
 
     return mbar, Kbar
+
+
+def barycenter_riccati():
+    """ A faster fixed point iteration scheme that exploits the riccati structure
+    of the problem """
+
+    # I = sum(A)
+
+    return

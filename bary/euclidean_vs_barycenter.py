@@ -1,7 +1,7 @@
 import gpflow
 import numpy as np
 import scipy
-from barycenter import barycenter
+from bary import barycenter
 import matplotlib.pyplot as plt
 
 # Conduct an aliasing experiment: Sample at less than the nyquist frequency, and condition two

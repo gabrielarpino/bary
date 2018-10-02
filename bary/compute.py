@@ -18,7 +18,7 @@ def fp_difference(K, *Ks):
     return K - np.mean([root(root_K @ Ki @ root_K) for Ki in Ks], axis=0)
 
 
-from barycenter import barycenter
+from bary import barycenter
 import gpflow
 mbar, Kbar = barycenter([0., 0., 0.], [K1, K2, K3], N=n, T=400)
 
