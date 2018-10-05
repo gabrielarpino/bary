@@ -136,8 +136,8 @@ def single_exp(num_samples = 12, outlier_mag = 0.1, seed = 1):
     # # Check whether w kernel is closer to empirical covariance matrix than the other juan
     # # empirical_cov = np.cov(gp_samples[1])
     true_gp_cov = cov_func(X).eval()
-    kbar_diff_norm = np.linalg.norm(true_gp_cov - Kbar)
-    keuc_diff_norm = np.linalg.norm(true_gp_cov - Keuc)
+    kbar_diff_norm = np.linalg.norm(true_gp_cov - Kbar) / np.linalg.norm(true_gp_cov)
+    keuc_diff_norm = np.linalg.norm(true_gp_cov - Keuc) / np.linalg.norm(true_gp_cov)
     print("KBAR diff norm", kbar_diff_norm)
     print("Keuc diff norm", keuc_diff_norm)
 
@@ -151,9 +151,9 @@ def run():
         for outlier_mag in [0.0, 0.1, 0.5, 1.0, 10.0]:
             kbd, ked = single_exp(12, outlier_mag, seed)
             kbd_list.append((kbd, outlier_mag, seed))
-            kbe_list.append((kbe, outlier_mag, seed))
+            ked_list.append((ked, outlier_mag, seed))
 
-    return kbd_list, kbe_list
+    return kbd_list, ked_list
 
 if __name__ == '__main__':
     run()
