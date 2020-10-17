@@ -1,7 +1,7 @@
-barycenter_ensemble
+On Wasserstein Gaussian Barycenters
 ==============================
 
-A project on using Optimal Transport to make model ensembles
+A project on using Optimal Transport to produce ensembles of Gaussian Processes. The idea is that barycenters produced using the Wasserstein distance possess certain properties that could be useful to practicioners.
 
 Project Organization
 --------------------
@@ -37,8 +37,6 @@ Plan
     1. Barycenter of two GP models with biased priors (single input)
         - Prior with biased mean
         - Prior with biased variance or covariance
-        - GP with different covariance functions? Show that barycentering GPs achieves the same as using the average covariance function? (this is a little harder to do)
+        - GP with different covariance functions.
     2. Barycenter of two graphical models with conjugacy structure biased in their own way
         (difficult, requires creating properly biased PGMs and showing closed forms for these)
-
-* Using stoch wass barycenter, and extending this to non-closed form models that are biased (harder).
